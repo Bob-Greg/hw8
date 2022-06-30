@@ -54,6 +54,11 @@ function bubble(arr:Array<any>, comp: (a:number, b:number) => number) {
     return arr
 }
 
+type File = {
+    fileName: string
+    fileContent: string
+}
+
 function App() {
 
     const [list, setList] = useState(new Array<ReactElement>(0))
@@ -61,19 +66,29 @@ function App() {
     const [outTxt, setOutTxt] = useState("")
     let ran = false
 
-    function getABCs(inTxt: string, outTxt: string) {
-        const inNums: number[] = inTxt.split(" ").map((a: string) => parseInt(a))
-        const outNums: number[] = outTxt.split(" ").map((a: string) => parseInt(a))
-        const _inNums = bubble([...inNums], (a, b) => (a - b))
-        const a = _inNums[0]
-        const b = _inNums[1]
-        const c = _inNums[_inNums.length - 1] - a - b
-        return [[a, b, c], outNums, inNums]
+    function solve(inTxt: File, outTxt: File) {
+        const inStr = inTxt.fileContent.replaceAll("\n", " ")
+        const nums = inStr.split(" ").map((str: string) => parseInt(str))
+        const expected = parseInt(outTxt.fileContent)
+        const N = nums[0]
+        let minX = Number.MAX_VALUE
+        let minY = Number.MAX_VALUE
+        let maxX = Number.MIN_VALUE
+        let maxY = Number.MIN_VALUE
+        for (let i = 0; i < N; i++) {
+            const j = i * 2 + 1
+            const x = nums[j], y = nums[j + 1]
+            minX = Math.min(x, minX)
+            maxX = Math.max(x, maxX)
+            minY = Math.min(y, minY)
+            maxY = Math.max(y, maxY)
+        }
+        const area = (maxX - minX) * (maxY - minY)
+        return <Entry ansCorrect={area === expected} in={`${inTxt.fileName} ${inStr}`} out={`${outTxt.fileName} ${outTxt.fileContent}`} ans={area.toString(10)}></Entry>
     }
 
     function runManual() {
-        const abc1 = getABCs(inTxt, outTxt)
-        setList([<Entry in={`Manual ${arrts(abc1[2])}`} out={`Manual ${arrts(abc1[1])}`} ans={`Ans: ${arrts(abc1[0])}`} ansCorrect={abc1[0].every((e: number) => abc1[1].includes(e))}/>])
+        setList([solve({fileName: "Manual/in", fileContent: inTxt}, {fileName: "Manual/out", fileContent: outTxt})])
     }
 
     async function run(_sleep: boolean) {
@@ -82,27 +97,21 @@ function App() {
         }
         ran = true
         let l: ReactElement[] = []
-        for (let i = 1; i <= 10; i++) {
+        for (let i = 1; i <= 3; i++) {
             let inTxt: any = undefined
-            await fetch(`${i}.in`)
+            await fetch(`${window.location.href}/linux-sample${i}in.txt`)
                 .then(resp => resp.text())
                 .then(dat => inTxt = dat)
             let outTxt: any = undefined
-            await fetch(`${i}.out`)
+            await fetch(`${window.location.href}/linux-sample${i}out.txt`)
                 .then(resp => resp.text())
                 .then(dat => outTxt = dat)
             while (inTxt === undefined || outTxt === undefined) ;
-            console.log(inTxt)
-            console.log(outTxt)
-            const abc1 = getABCs(inTxt, outTxt)
-            const abc = abc1[0]
-            const outNums = abc1[1]
-            const inNums = abc1[2]
             l = [...l]
             if (_sleep)
                 l.splice(l.length - 1, 1)
-            l.push(<Entry ansCorrect={abc.every(e => outNums.includes(e))} key={l.length} ans={`Ans: ${arrts(abc)}`} in={`/${i}.in ${arrts(inNums)}`} out={`/${i}.out ${arrts(outNums)}`}/>)
-            if (i !== 10 && _sleep)
+            l.push(solve({fileName: `/linux-sample${i}in.txt`, fileContent: inTxt}, {fileName: `/linux-sample${i}out.txt`, fileContent: outTxt}))
+            if (i !== 4 && _sleep)
                 l.push(<Rf fileName={`/${i + 1}.in, /${i + 1}.out (I made it sleep for 500ms to make it look cool :(( )`}/>)
             setList(l)
             if (_sleep)
@@ -113,7 +122,7 @@ function App() {
     return (
         <div className={"mt-6 ml-6 mb-6 mr-6 pl-1.5 pt-1 wh-full overflow-auto space new-text-aqua new-box-aqua"}>
             ABCs<br/>
-            https://github.com/bob-greg/hw7<br/><br/>
+            https://github.com/bob-greg/hw8<br/><br/>
             <button onClick={() => {
                     if (ran) {
                         return
@@ -159,7 +168,7 @@ function App() {
             </button>
             <br/>
             <br/>
-            <ul className={"list-disc list-inside pl-3 text-sm"}>
+            <ul className={"list-disc list-inside pl-3 text-sm mono"}>
                 {list}
             </ul>
         </div>
