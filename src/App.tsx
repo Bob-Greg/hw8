@@ -31,28 +31,7 @@ function Rf(props: RFProps) {
     )
 }
 
-function arrts(arr: Array<any>) {
-    let str = "["
-    str += arr.toString().replaceAll(",", ", ")
-    str += "]"
-    return str
-}
-
 const sleep = (ms: number) => new Promise(r => setTimeout(r, ms));
-
-function bubble(arr:Array<any>, comp: (a:number, b:number) => number) {
-    for (let i = 0; i < arr.length - 1; i++) {
-        for (let j = 0; j < arr.length - i - 1; j++) {
-            if (comp(arr[j], arr[j + 1]) > 0) {
-                let tmp = arr[j]
-                arr[j] = arr[j + 1]
-                arr[j + 1] = tmp
-            }
-        }
-
-    }
-    return arr
-}
 
 type File = {
     fileName: string
@@ -64,6 +43,7 @@ function App() {
     const [list, setList] = useState(new Array<ReactElement>(0))
     const [inTxt, setInTxt] = useState("")
     const [outTxt, setOutTxt] = useState("")
+    const [showingCustom, setShowingCustom] = useState(false)
     let ran = false
 
     function solve(inTxt: File, outTxt: File) {
@@ -99,11 +79,11 @@ function App() {
         let l: ReactElement[] = []
         for (let i = 1; i <= 3; i++) {
             let inTxt: any = undefined
-            await fetch(`${window.location.href}/linux-sample${i}in.txt`)
+            await fetch(`linux-sample${i}in.txt`)
                 .then(resp => resp.text())
                 .then(dat => inTxt = dat)
             let outTxt: any = undefined
-            await fetch(`${window.location.href}/linux-sample${i}out.txt`)
+            await fetch(`linux-sample${i}out.txt`)
                 .then(resp => resp.text())
                 .then(dat => outTxt = dat)
             while (inTxt === undefined || outTxt === undefined) ;
@@ -121,7 +101,7 @@ function App() {
 
     return (
         <div className={"mt-6 ml-6 mb-6 mr-6 pl-1.5 pt-1 wh-full overflow-auto space new-text-aqua new-box-aqua"}>
-            ABCs<br/>
+            Art Class<br/>
             https://github.com/bob-greg/hw8<br/><br/>
             <button onClick={() => {
                     if (ran) {
@@ -149,26 +129,36 @@ function App() {
             </button>
             <br/>
             <br/>
-            Custom test cases:
+            <div onClick={() => {setShowingCustom(!showingCustom)}}>Custom test cases {showingCustom ? "▽" : "△"}</div>
             <div className={"pb-1"}/>
-            <TextBox defaultText={"*.in here"} customCss={"rounded-xl new-text-amber pl-1.5 pr-1.5 new-button-amber"} onChange={str => setInTxt(str)}/>
-            <div className={"pb-3"}/>
-            <TextBox defaultText={"*.out here"} customCss={"rounded-xl new-text-amber pl-1.5 pr-1.5 new-button-amber"} onChange={str => setOutTxt(str)}/>
-            <div className={"pb-3"}/>
-            <button onClick={() => {
-                if (ran) {
-                    return
-                }
-                ran = false
-                runManual()
-            }}
-                    className={"rounded-xl new-button-amber pl-1.5 pr-1.5 transition new-text-amber ease-in-out delay-50 hover:bg-sky-400 hover:text-white duration:300 pl-1 pr-1"}
-            >
-                run custom test case!
-            </button>
+            { showingCustom &&
+                <div>
+                    <TextBox defaultText={"*.in here"}
+                             customCss={"rounded-xl new-text-amber pl-1.5 pr-1.5 new-button-amber"}
+                             onChange={str => setInTxt(str)}/>
+                    <div className={"pb-3"}/>
+                    <TextBox defaultText={"*.out here"}
+                             customCss={"rounded-xl new-text-amber pl-1.5 pr-1.5 new-button-amber"}
+                             onChange={str => setOutTxt(str)}/>
+                    <div className={"pb-3"}/>
+                    <button onClick={() => {
+                        if (ran) {
+                            return
+                        }
+                        ran = false
+                        runManual()
+                    }}
+                            className={"rounded-xl new-button-amber pl-1.5 pr-1.5 transition new-text-amber ease-in-out delay-50 hover:bg-sky-400 hover:text-white duration:300 pl-1 pr-1"}
+                    >
+                        run custom test case!
+                    </button>
+                    <br/>
+                </div>
+            }
             <br/>
-            <br/>
-            <ul className={"list-disc list-inside pl-3 text-sm mono"}>
+
+            Output:
+            <ul className={"list-inside pl-3 pr-3 text-sm mono"}>
                 {list}
             </ul>
         </div>

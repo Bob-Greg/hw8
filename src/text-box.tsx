@@ -10,18 +10,18 @@ export const TextBox = (props:TextBoxProps) => {
 
     const [text, setText] = useState(props.defaultText)
 
-    function change(ev:ChangeEvent<HTMLInputElement>) {
+    function change(ev:ChangeEvent<HTMLTextAreaElement>) {
         setText(ev.target.value)
         props.onChange(ev.target.value)
     }
 
     return (
         <div>
-            <input
-                type="text"
+            <textarea
                 value={text}
                 onChange={change}
                 onFocus={event => event.currentTarget.select()}
+                rows={5}
                 className={`${props.customCss}`}
             />
         </div>
